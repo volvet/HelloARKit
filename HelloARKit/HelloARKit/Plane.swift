@@ -18,8 +18,8 @@ class Plane : SCNNode {
         super.init()
         
         let material = SCNMaterial()
-        let img = UIImage(named: "tron_grid.png")
-        material.diffuse.contents = img
+
+        material.diffuse.contents = #imageLiteral(resourceName: "tron_grid.png")
         self.planeGeometry.materials = [material]
         
         let planeNode = SCNNode(geometry: self.planeGeometry)
