@@ -10,12 +10,16 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+
+let CollisionCategoryBottom : NSInteger = 1 << 0
+let CollisionCategoryCube : NSInteger   = 1 << 1
+
+class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate, SCNPhysicsContactDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
-    var planes =  Dictionary<UUID, Plane>()
-    
+    var planes =  Dictionary<UUID, PlaneEx>()
+    var boxes : [SCNNode]  = []
     
     func setupScene() {
         self.sceneView.delegate = self
@@ -24,6 +28,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.sceneView.autoenablesDefaultLighting = true
         self.sceneView.showsStatistics = true
         self.sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,ARSCNDebugOptions.showFeaturePoints]
+        //self.sceneView.scene.physicsWorld.gravity = SCNVector3Make(0, -9.8, 0)
+        
+        self.setupBottomPlane()
     }
     
     func setupSession() {
@@ -39,7 +46,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let tagGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.handleTapFrom))
         
         //let recognizer = UITapGestureRecognizer(target: self, action: "handleTapFrom:")
-        tagGestureRecognizer.numberOfTapsRequired = 2
+        tagGestureRecognizer.numberOfTapsRequired = 1
         self.sceneView.addGestureRecognizer(tagGestureRecognizer)
         
         let explosionGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.handleHoldFrom))
@@ -52,8 +59,32 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.sceneView.addGestureRecognizer(hidePlanesGestureRecognizer)
     }
     
+    func setupBottomPlane() {
+        let bottomPlane = SCNBox(width: 1000, height: 0.5, length: 1000, chamferRadius: 0)
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor(white: 1.0, alpha: 0.0)
+        bottomPlane.materials = [material]
+        let bottomNode = SCNNode(geometry: bottomPlane)
+        bottomNode.position = SCNVector3Make(0, -10, 0)
+        bottomNode.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: bottomPlane, options: nil))
+        bottomNode.physicsBody?.categoryBitMask = CollisionCategoryBottom
+        bottomNode.physicsBody?.contactTestBitMask = CollisionCategoryCube
+        
+        self.sceneView.scene.rootNode.addChildNode(bottomNode)
+        self.sceneView.scene.physicsWorld.contactDelegate = self
+    }
+    
     @objc func handleTapFrom(recoginizer : UITapGestureRecognizer) {
-        NSLog("detect tap")
+        //NSLog("detect tap")
+        let tapPoint = recoginizer.location(in: self.sceneView)
+        let results = self.sceneView.hitTest(tapPoint, types: .existingPlaneUsingExtent)
+        
+        if results.count == 0 {
+            return
+        }
+        
+        let hitResult = results.first
+        self.insertGeometry(hitResult: hitResult!)
     }
     
     @objc func handleHoldFrom(recognizer : UILongPressGestureRecognizer) {
@@ -62,6 +93,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     @objc func handleHidePlaneFrom(recognizer : UILongPressGestureRecognizer) {
         NSLog("detect hide plane")
+    }
+    
+    func insertGeometry(hitResult : ARHitTestResult) {
+        NSLog("insert box")
+        
+        let dimension = 0.1
+        let cube = SCNBox(width: CGFloat(dimension), height: CGFloat(dimension), length: CGFloat(dimension), chamferRadius: 0)
+        let node = SCNNode(geometry: cube)
+        node.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        node.physicsBody?.mass = 4.0
+        node.physicsBody?.categoryBitMask = CollisionCategoryCube
+        let insertYOffset : Float = 0.5
+        node.position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z)
+        self.sceneView.scene.rootNode.addChildNode(node)
+        self.boxes.append(node)
+    }
+    
+    func explode(hitResult : ARHitTestResult) {
+        //let explosionOffset : Float = 0.1
+        //let position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + explosionOffset, hitResult.worldTransform.columns.3.z)
     }
     
     override func viewDidLoad() {
@@ -97,6 +148,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
     }
+    
+    // MARK: - SCNPhysicsContactDelegate
+    
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        NSLog("contack begin: nodeA.mask is %d, nodeB.mask is %d", contact.nodeA.categoryBitMask, contact.nodeB.categoryBitMask)
+        
+        let contactMask = contact.nodeA.categoryBitMask | contact.nodeB.categoryBitMask
+        
+        if contactMask == CollisionCategoryBottom | CollisionCategoryCube {
+            if contact.nodeA.physicsBody?.categoryBitMask == CollisionCategoryBottom {
+                contact.nodeB.removeFromParentNode()
+            } else {
+                contact.nodeA.removeFromParentNode()
+            }
+        }
+    }
 
     // MARK: - ARSCNViewDelegate
     
@@ -111,7 +178,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if let planeAnchar = anchor as? ARPlaneAnchor {
             NSLog("didAdd SCNNode")
-            let plane = Plane(anchor: planeAnchar)
+            let plane = PlaneEx(anchor: planeAnchar, isHidden: false)
             self.planes[anchor.identifier] = plane
             node.addChildNode(plane)
         }
@@ -119,8 +186,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         if let planeAnchar = anchor as? ARPlaneAnchor {
-            NSLog("didUpdate SCNNode")
-            var plane : Plane?
+            //NSLog("didUpdate SCNNode")
+            var plane : PlaneEx?
             plane = self.planes[anchor.identifier]
             
             plane?.update(PlanAnchor: planeAnchar)

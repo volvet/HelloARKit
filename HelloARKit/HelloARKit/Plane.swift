@@ -63,7 +63,7 @@ class PlaneEx : SCNNode {
         self.anchor = anchor
         
         let width = anchor.extent.x
-        let height = 0.1
+        let height = 0.01
         let length = anchor.extent.z
         self.planeGeometry = SCNBox(width: CGFloat(width), height: CGFloat(height), length: CGFloat(length), chamferRadius: 0)
         
@@ -95,7 +95,7 @@ class PlaneEx : SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(anchar : ARPlaneAnchor) {
+    func update(PlanAnchor anchar : ARPlaneAnchor) {
         self.planeGeometry.width = CGFloat(anchar.extent.x)
         self.planeGeometry.length = CGFloat(anchar.extent.z)
         
@@ -107,7 +107,7 @@ class PlaneEx : SCNNode {
     
     func setTextureScale() {
         let width = self.planeGeometry.width
-        let height = self.planeGeometry.height
+        let height = self.planeGeometry.length
         
         let material = self.planeGeometry.materials[4]
         material.diffuse.contentsTransform = SCNMatrix4MakeScale(Float(width), Float(height), 1)
