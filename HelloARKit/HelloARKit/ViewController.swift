@@ -20,6 +20,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
     
     var planes =  Dictionary<UUID, PlaneEx>()
     var boxes : [SCNNode]  = []
+    var bottomPlane : SCNNode?
     
     func setupScene() {
         self.sceneView.delegate = self
@@ -96,14 +97,18 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
     }
     
     func insertGeometry(hitResult : ARHitTestResult) {
-        NSLog("insert box")
-        
         let dimension = 0.1
         let cube = SCNBox(width: CGFloat(dimension), height: CGFloat(dimension), length: CGFloat(dimension), chamferRadius: 0)
+        
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor(red: CGFloat(drand48()), green: CGFloat(drand48()), blue: CGFloat(drand48()), alpha: 1.0)
+        cube.materials = [material]
+        
         let node = SCNNode(geometry: cube)
         node.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
-        node.physicsBody?.mass = 4.0
+        node.physicsBody?.mass = 2.0
         node.physicsBody?.categoryBitMask = CollisionCategoryCube
+        
         let insertYOffset : Float = 0.5
         node.position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z)
         self.sceneView.scene.rootNode.addChildNode(node)
@@ -152,15 +157,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
     // MARK: - SCNPhysicsContactDelegate
     
     func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
-        NSLog("contack begin: nodeA.mask is %d, nodeB.mask is %d", contact.nodeA.categoryBitMask, contact.nodeB.categoryBitMask)
+        let contactMask = (contact.nodeA.physicsBody?.categoryBitMask)! | (contact.nodeB.physicsBody?.categoryBitMask)!
         
-        let contactMask = contact.nodeA.categoryBitMask | contact.nodeB.categoryBitMask
-        
+        var removedBox : SCNNode? = nil
         if contactMask == CollisionCategoryBottom | CollisionCategoryCube {
             if contact.nodeA.physicsBody?.categoryBitMask == CollisionCategoryBottom {
                 contact.nodeB.removeFromParentNode()
+                removedBox = contact.nodeB
             } else {
                 contact.nodeA.removeFromParentNode()
+                removedBox = contact.nodeA
+            }
+            
+            if let index = self.boxes.index(of : removedBox!) {
+                self.boxes.remove(at: index)
             }
         }
     }
