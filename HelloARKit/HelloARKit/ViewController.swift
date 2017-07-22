@@ -13,13 +13,14 @@ import ARKit
 
 let CollisionCategoryBottom : NSInteger = 1 << 0
 let CollisionCategoryCube : NSInteger   = 1 << 1
+let CollisionCategorySphere : NSInteger = 1 << 2
 
 class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDelegate, SCNPhysicsContactDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
     var planes =  Dictionary<UUID, PlaneEx>()
-    var boxes : [SCNNode]  = []
+    var nodes : [SCNNode]  = []
     var bottomPlane : SCNNode?
     
     func setupScene() {
@@ -69,7 +70,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
         bottomNode.position = SCNVector3Make(0, -10, 0)
         bottomNode.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: bottomPlane, options: nil))
         bottomNode.physicsBody?.categoryBitMask = CollisionCategoryBottom
-        bottomNode.physicsBody?.contactTestBitMask = CollisionCategoryCube
+        bottomNode.physicsBody?.contactTestBitMask = CollisionCategoryCube | CollisionCategorySphere
         
         self.sceneView.scene.rootNode.addChildNode(bottomNode)
         self.sceneView.scene.physicsWorld.contactDelegate = self
@@ -97,14 +98,19 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
     }
     
     func insertGeometry(hitResult : ARHitTestResult) {
-        let dimension = 0.1
-        let cube = SCNBox(width: CGFloat(dimension), height: CGFloat(dimension), length: CGFloat(dimension), chamferRadius: 0)
+        let dimension = 0.05
+        /*let cube = SCNBox(width: CGFloat(dimension), height: CGFloat(dimension), length: CGFloat(dimension), chamferRadius: 0)
         
         let material = SCNMaterial()
         material.diffuse.contents = UIColor(red: CGFloat(drand48()), green: CGFloat(drand48()), blue: CGFloat(drand48()), alpha: 1.0)
-        cube.materials = [material]
+        cube.materials = [material]*/
+         
+        let boll = SCNSphere(radius: CGFloat(dimension))
+        let material = SCNMaterial()
+        material.diffuse.contents = UIColor(red: CGFloat(drand48()), green: CGFloat(drand48()), blue: CGFloat(drand48()), alpha: 1.0)
+        boll.materials = [material]
         
-        let node = SCNNode(geometry: cube)
+        let node = SCNNode(geometry: boll)
         node.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
         node.physicsBody?.mass = 2.0
         node.physicsBody?.categoryBitMask = CollisionCategoryCube
@@ -112,7 +118,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
         let insertYOffset : Float = 0.5
         node.position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z)
         self.sceneView.scene.rootNode.addChildNode(node)
-        self.boxes.append(node)
+        self.nodes.append(node)
+        
     }
     
     func explode(hitResult : ARHitTestResult) {
@@ -160,7 +167,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
         let contactMask = (contact.nodeA.physicsBody?.categoryBitMask)! | (contact.nodeB.physicsBody?.categoryBitMask)!
         
         var removedBox : SCNNode? = nil
-        if contactMask == CollisionCategoryBottom | CollisionCategoryCube {
+        if (contactMask == CollisionCategoryBottom | CollisionCategoryCube) || (contactMask == CollisionCategoryBottom | CollisionCategorySphere) {
             if contact.nodeA.physicsBody?.categoryBitMask == CollisionCategoryBottom {
                 contact.nodeB.removeFromParentNode()
                 removedBox = contact.nodeB
@@ -169,8 +176,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
                 removedBox = contact.nodeA
             }
             
-            if let index = self.boxes.index(of : removedBox!) {
-                self.boxes.remove(at: index)
+            if let index = self.nodes.index(of : removedBox!) {
+                self.nodes.remove(at: index)
             }
         }
     }
