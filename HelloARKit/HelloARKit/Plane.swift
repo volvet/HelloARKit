@@ -110,7 +110,11 @@ class PlaneEx : SCNNode {
         let height = self.planeGeometry.length
         
         let material = self.planeGeometry.materials[4]
-        material.diffuse.contentsTransform = SCNMatrix4MakeScale(Float(width), Float(height), 1)
+        let matrix  = SCNMatrix4MakeScale(Float(width), Float(height), 1)
+        material.diffuse.contentsTransform = matrix
+        material.roughness.contentsTransform = matrix
+        material.metalness.contentsTransform = matrix
+        material.normal.contentsTransform = matrix
         material.diffuse.wrapS = .`repeat`
         material.diffuse.wrapT = .`repeat`
     }
@@ -119,6 +123,10 @@ class PlaneEx : SCNNode {
         let transparentMaterial = SCNMaterial()
         transparentMaterial.diffuse.contents = UIColor(white: 1.0, alpha: 0.0)
         self.planeGeometry.materials = [transparentMaterial, transparentMaterial, transparentMaterial, transparentMaterial, transparentMaterial, transparentMaterial]
+    }
+    
+    func remove() {
+        self.removeFromParentNode()
     }
     
     var anchor : ARPlaneAnchor

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		D3095EFD1F1FA6C3002AF170 /* tron_grid.png in Resources */ = {isa = PBXBuildFile; fileRef = D3095EFC1F1FA6B9002AF170 /* tron_grid.png */; };
+		D31A0C371F260B74002E6977 /* Cube.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31A0C361F260B74002E6977 /* Cube.swift */; };
+		D31A0C391F261768002E6977 /* PBRMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31A0C381F261768002E6977 /* PBRMaterial.swift */; };
 		D3696C161F1E0B9400121E76 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3696C151F1E0B9400121E76 /* AppDelegate.swift */; };
 		D3696C181F1E0B9400121E76 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = D3696C171F1E0B9400121E76 /* art.scnassets */; };
 		D3696C1A1F1E0B9400121E76 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3696C191F1E0B9400121E76 /* ViewController.swift */; };
@@ -19,6 +21,8 @@
 
 /* Begin PBXFileReference section */
 		D3095EFC1F1FA6B9002AF170 /* tron_grid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tron_grid.png; sourceTree = "<group>"; };
+		D31A0C361F260B74002E6977 /* Cube.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cube.swift; sourceTree = "<group>"; };
+		D31A0C381F261768002E6977 /* PBRMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PBRMaterial.swift; sourceTree = "<group>"; };
 		D3696C121F1E0B9400121E76 /* HelloARKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloARKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3696C151F1E0B9400121E76 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3696C171F1E0B9400121E76 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -63,6 +67,8 @@
 				D3696C151F1E0B9400121E76 /* AppDelegate.swift */,
 				D3696C191F1E0B9400121E76 /* ViewController.swift */,
 				D3AD77AD1F1F0AA1008A8127 /* Plane.swift */,
+				D31A0C361F260B74002E6977 /* Cube.swift */,
+				D31A0C381F261768002E6977 /* PBRMaterial.swift */,
 				D3696C1B1F1E0B9400121E76 /* Main.storyboard */,
 				D3696C171F1E0B9400121E76 /* art.scnassets */,
 				D3696C1E1F1E0B9400121E76 /* Assets.xcassets */,
@@ -146,6 +152,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D31A0C371F260B74002E6977 /* Cube.swift in Sources */,
+				D31A0C391F261768002E6977 /* PBRMaterial.swift in Sources */,
 				D3696C1A1F1E0B9400121E76 /* ViewController.swift in Sources */,
 				D3AD77AE1F1F0AA1008A8127 /* Plane.swift in Sources */,
 				D3696C161F1E0B9400121E76 /* AppDelegate.swift in Sources */,
