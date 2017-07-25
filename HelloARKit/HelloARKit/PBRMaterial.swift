@@ -10,20 +10,20 @@ import Foundation
 import SceneKit
 
 class PBRMaterial {
-    static func materialByName(name : String) -> SCNMaterial? {
+    static func materialByName(name : String) -> SCNMaterial {
         
         var material = PBRMaterial.materials[name]
         
         if (material != nil) {
-            return material
+            return material!
         }
         
         material = SCNMaterial()
         material?.lightingModel = .physicallyBased
-        material?.diffuse.contents = UIImage(named: "./Assets.scassets/Materials/" + name + "/" + name + "-albedo.png")
-        material?.roughness.contents = UIImage(named: "./Assets.scassets/Materials/" + name + "/" + name + "-roughnes.png")
-        material?.roughness.contents = UIImage(named: "./Assets.scassets/Materials/" + name + "/" + name + "-metal.png")
-        material?.normal.contents = UIImage(named: "./Assets.scassets/Materials/" + name + "/" + name + "-normal.png")
+        material?.diffuse.contents = UIImage(named: "./Assets.xcassets/Materials/" + name + "/" + name + "-albedo.png")
+        material?.roughness.contents = UIImage(named: "./Assets.xcassets/Materials/" + name + "/" + name + "-roughness.png")
+        material?.roughness.contents = UIImage(named: "./Assets.xcassets/Materials/" + name + "/" + name + "-metal.png")
+        material?.normal.contents = UIImage(named: "./Assets.xcassets/Materials/" + name + "/" + name + "-normal.png")
         
         material?.diffuse.wrapS = .`repeat`
         material?.diffuse.wrapT = .`repeat`
@@ -36,7 +36,7 @@ class PBRMaterial {
         
         materials[name] = material
         
-        return material
+        return material!
     }
     
     static var materials = Dictionary<String, SCNMaterial>()

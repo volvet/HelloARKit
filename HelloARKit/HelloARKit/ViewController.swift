@@ -28,9 +28,13 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
         let scene = SCNScene()
         self.sceneView.scene = scene
         self.sceneView.autoenablesDefaultLighting = true
+        self.sceneView.automaticallyUpdatesLighting = true
         self.sceneView.showsStatistics = true
         self.sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,ARSCNDebugOptions.showFeaturePoints]
-        //self.sceneView.scene.physicsWorld.gravity = SCNVector3Make(0, -9.8, 0)
+        self.sceneView.antialiasingMode = .multisampling4X
+        
+        // Do we need to set the lighting environment?
+        //self.sceneView.scene.lightingEnvironment.contents = ?
         
         self.setupBottomPlane()
     }
@@ -98,27 +102,25 @@ class ViewController: UIViewController, ARSCNViewDelegate, UIGestureRecognizerDe
     }
     
     func insertGeometry(hitResult : ARHitTestResult) {
-        let dimension = 0.05
-        /*let cube = SCNBox(width: CGFloat(dimension), height: CGFloat(dimension), length: CGFloat(dimension), chamferRadius: 0)
-        
-        let material = SCNMaterial()
-        material.diffuse.contents = UIColor(red: CGFloat(drand48()), green: CGFloat(drand48()), blue: CGFloat(drand48()), alpha: 1.0)
-        cube.materials = [material]*/
-         
-        let boll = SCNSphere(radius: CGFloat(dimension))
-        let material = SCNMaterial()
-        material.diffuse.contents = UIColor(red: CGFloat(drand48()), green: CGFloat(drand48()), blue: CGFloat(drand48()), alpha: 1.0)
-        boll.materials = [material]
-        
-        let node = SCNNode(geometry: boll)
-        node.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
-        node.physicsBody?.mass = 2.0
-        node.physicsBody?.categoryBitMask = CollisionCategoryCube
-        
+        //let dimension = 0.05
         let insertYOffset : Float = 0.5
-        node.position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z)
-        self.sceneView.scene.rootNode.addChildNode(node)
-        self.nodes.append(node)
+        let cube = Cube(position: SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z),
+                        withMaterial: Cube.currentMaterial())
+        
+        //let boll = SCNSphere(radius: CGFloat(dimension))
+        //let material = SCNMaterial()
+        //material.diffuse.contents = UIColor(red: CGFloat(drand48()), green: CGFloat(drand48()), blue: CGFloat(drand48()), alpha: 1.0)
+        //boll.materials = [material]
+        
+        //let node = SCNNode(geometry: cube)
+        //node.physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        //node.physicsBody?.mass = 2.0
+        //node.physicsBody?.categoryBitMask = CollisionCategoryCube
+        
+        
+        //node.position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z)
+        self.sceneView.scene.rootNode.addChildNode(cube)
+        self.nodes.append(cube)
         
     }
     

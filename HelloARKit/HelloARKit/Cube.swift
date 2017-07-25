@@ -15,7 +15,7 @@ class Cube : SCNNode {
     init(position : SCNVector3, withMaterial material : SCNMaterial) {
         super.init()
         
-        let dimension : CGFloat = 0.2
+        let dimension : CGFloat = 0.1
         let cube = SCNBox(width: dimension, height: dimension, length: dimension, chamferRadius: 0)
         cube.materials = [material]
         
@@ -35,11 +35,32 @@ class Cube : SCNNode {
     }
     
     func changeMaterial() {
-        //TODO
+        Cube.currentMaterialIndex = (Cube.currentMaterialIndex + 1)%4
+        self.childNodes.first?.geometry?.materials = [Cube.currentMaterial()]
     }
     
-    static func currentMaterial() -> SCNMaterial? {
+    static func currentMaterial() -> SCNMaterial {
         //TODO
-        return nil
+        var materialName : String? = nil
+        
+        switch (currentMaterialIndex) {
+        case 0:
+            materialName = "rustediron-streaks"
+            break
+        case 1:
+            materialName = "carvedlimestoneground"
+            break
+        case 2:
+            materialName = "granitesmooth"
+            break
+        case 3:
+            materialName = "old-textured-fabric"
+            break
+        default:
+            materialName = "rustediron-streaks"
+        }
+        return PBRMaterial.materialByName(name: materialName!)
     }
+    
+    static var currentMaterialIndex : Int = 0
 }
